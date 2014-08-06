@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "AVCamPreviewView.h"
+#import "PreviewViewController.h"
 
 static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDeviceAuthorizedContext;
 static void * CapturingStillImageContext = &CapturingStillImageContext;
@@ -34,6 +35,8 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
 @property (nonatomic) BOOL lockInterfaceRotation;
 @property (nonatomic) id runtimeErrorHandlingObserver;
 
+// Passing variable
+@property (nonatomic, strong) PreviewViewController *previewVC;
 @end
 
 
@@ -294,9 +297,7 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
 				NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 				UIImage *image = [[UIImage alloc] initWithData:imageData];
                 
-                image = [self cropImageInSquare:image];
-				
-                [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[image CGImage] orientation:(ALAssetOrientation)[image imageOrientation] completionBlock:nil];
+				[_previewVC.imagePreview setImage:[self cropImageInSquare:image]];
 			}
 		}];
 	});
@@ -358,6 +359,16 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
     
     return scaledNewImage;
 
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Make sure your segue name in storyboard is the same as this line
+    if ([[segue identifier] isEqualToString:@"previewPhoto"])
+    {
+        // Pass any objects to the view controller here, like...
+        _previewVC = segue.destinationViewController;
+    }
 }
 
 @end
