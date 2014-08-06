@@ -124,7 +124,7 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
 {
     dispatch_async([self sessionQueue], ^{
         [self addObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" options:(NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew)  context:SessionRunningAndDeviceAuthorizedContext];
-        //[self addObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:CapturingStillImageContext];
+        [self addObserver:self forKeyPath:@"photoOutput.capturingStillImage" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:CapturingStillImageContext];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(subjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
         
@@ -293,7 +293,10 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
 			{
 				NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 				UIImage *image = [[UIImage alloc] initWithData:imageData];
-				[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[image CGImage] orientation:(ALAssetOrientation)[image imageOrientation] completionBlock:nil];
+                
+                image = [self cropImageInSquare:image];
+				
+                [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[image CGImage] orientation:(ALAssetOrientation)[image imageOrientation] completionBlock:nil];
 			}
 		}];
 	});
@@ -304,4 +307,57 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
 	CGPoint devicePoint = CGPointMake(.5, .5);
 	[self focusWithMode:AVCaptureFocusModeContinuousAutoFocus exposeWithMode:AVCaptureExposureModeContinuousAutoExposure atDevicePoint:devicePoint monitorSubjectAreaChange:NO];
 }
+
+- (UIImage *)cropImageInSquare:(UIImage *)originalImage
+{
+    //calculate scale factor to go between cropframe and original image
+    float SF = originalImage.size.width / 320;
+    
+    //find the centre x,y coordinates of image
+    float centreX = originalImage.size.width / 2;
+    float centreY = originalImage.size.height / 2;
+    
+    //calculate crop parameters
+    float cropX = centreX - ((320 / 2) * SF);
+    float cropY = centreY - ((320 / 2) * SF);
+
+    CGRect cropRect = CGRectMake(cropX, cropY, 320*SF, 320*SF);
+    
+    CGAffineTransform rectTransform;
+    switch (originalImage.imageOrientation)
+    {
+        case UIImageOrientationLeft:
+            rectTransform = CGAffineTransformTranslate(CGAffineTransformMakeRotation(M_PI_2), 0, -originalImage.size.height);
+            break;
+        case UIImageOrientationRight:
+            rectTransform = CGAffineTransformTranslate(CGAffineTransformMakeRotation(-M_PI_2), -originalImage.size.width, 0);
+            break;
+        case UIImageOrientationDown:
+            rectTransform = CGAffineTransformTranslate(CGAffineTransformMakeRotation(-M_PI), -originalImage.size.width, -originalImage.size.height);
+            break;
+        default:
+            rectTransform = CGAffineTransformIdentity;
+    };
+    rectTransform = CGAffineTransformScale(rectTransform, originalImage.scale, originalImage.scale);
+    
+    CGImageRef imageRef = CGImageCreateWithImageInRect([originalImage CGImage], CGRectApplyAffineTransform(cropRect, rectTransform));
+    UIImage *result = [UIImage imageWithCGImage:imageRef scale:originalImage.scale orientation:originalImage.imageOrientation];
+    CGImageRelease(imageRef);
+    //return result;
+    //Now want to scale down cropped image!
+    //want to multiply frames by 2 to get retina resolution
+    CGRect scaledImgRect = CGRectMake(0, 0, (320 * 2), (320 * 2));
+    
+    UIGraphicsBeginImageContextWithOptions(scaledImgRect.size, NO, [UIScreen mainScreen].scale);
+    
+    [result drawInRect:scaledImgRect];
+    
+    UIImage *scaledNewImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+    
+    return scaledNewImage;
+
+}
+
 @end
