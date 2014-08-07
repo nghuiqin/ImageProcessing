@@ -1,15 +1,15 @@
 ImageProcessing
 ===============
-This is the code implemented by using AVCAM project from apple ios sample code.
+This is the code implemented by refering to AVCAM project in Apple ios sample code.
 
 Currently Done:
-1. take photo 
-2. crop photo in fix sized (due to uiimagepickercontroller has bug in ios 7)
-3. preview photo
+Take photo 
+Crop photo in fix sized (due to uiimagepickercontroller has bug in ios 7)
+Preview photo
 
 Future works:
-1. filter for picture
-2. imageprocessing work
+Filter for picture
+Imageprocessing work
 
 License
 ================
