@@ -336,20 +336,20 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
     CGImageRef imageRef = CGImageCreateWithImageInRect([originalImage CGImage], CGRectApplyAffineTransform(cropRect, rectTransform));
     UIImage *result = [UIImage imageWithCGImage:imageRef scale:originalImage.scale orientation:originalImage.imageOrientation];
     CGImageRelease(imageRef);
-    return result;
+    //return result;
     //Now want to scale down cropped image!
     //want to multiply frames by 2 to get retina resolution
-//    CGRect scaledImgRect = CGRectMake(0, 0, (320 * 2), (320 * 2));
-//    
-//    UIGraphicsBeginImageContextWithOptions(scaledImgRect.size, NO, [UIScreen mainScreen].scale);
-//    
-//    [result drawInRect:scaledImgRect];
-//    
-//    UIImage *scaledNewImage = UIGraphicsGetImageFromCurrentImageContext();
-//    
-//    UIGraphicsEndImageContext();
-//    
-//    return scaledNewImage;
+    CGRect scaledImgRect = CGRectMake(0, 0, (320 * 2), (320 * 2));
+    
+    UIGraphicsBeginImageContextWithOptions(scaledImgRect.size, NO, [UIScreen mainScreen].scale);
+    
+    [result drawInRect:scaledImgRect];
+    
+    UIImage *scaledNewImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+    
+    return scaledNewImage;
 
 }
 
