@@ -7,6 +7,8 @@
 //
 
 #import "PreviewViewController.h"
+#import <AVFoundation/AVFoundation.h>
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @interface PreviewViewController ()
 
@@ -27,6 +29,9 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    UIBarButtonItem *backBar = [[UIBarButtonItem alloc] init];
+    [backBar setTitle:@"Retake"];
+    self.navigationController.navigationBar.topItem.backBarButtonItem = backBar;
 }
 
 - (void)didReceiveMemoryWarning
@@ -46,6 +51,8 @@
 }
 */
 - (IBAction)saveTapped:(id)sender {
+    NSLog(@"saveTapped");
+    [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[self.imagePreview.image CGImage] orientation:(ALAssetOrientation)[self.imagePreview.image imageOrientation] completionBlock:nil];
 }
 
 @end
