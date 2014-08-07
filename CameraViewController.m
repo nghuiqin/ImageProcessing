@@ -313,16 +313,8 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
 {
     //calculate scale factor to go between cropframe and original image
     float SF = originalImage.size.width / 320;
-    
-    //find the centre x,y coordinates of image
-    float centreX = originalImage.size.width / 2;
-    float centreY = originalImage.size.height / 2;
-    
-    //calculate crop parameters
-    float cropX = centreX - ((320 / 2) * SF);
-    float cropY = centreY - ((320 / 2) * SF);
 
-    CGRect cropRect = CGRectMake(cropX, cropY, 320*SF, 320*SF);
+    CGRect cropRect = CGRectMake(0,64*SF, 320*SF, 320*SF);
     
     CGAffineTransform rectTransform;
     switch (originalImage.imageOrientation)
@@ -344,20 +336,20 @@ static void * CapturingStillImageContext = &CapturingStillImageContext;
     CGImageRef imageRef = CGImageCreateWithImageInRect([originalImage CGImage], CGRectApplyAffineTransform(cropRect, rectTransform));
     UIImage *result = [UIImage imageWithCGImage:imageRef scale:originalImage.scale orientation:originalImage.imageOrientation];
     CGImageRelease(imageRef);
-    //return result;
+    return result;
     //Now want to scale down cropped image!
     //want to multiply frames by 2 to get retina resolution
-    CGRect scaledImgRect = CGRectMake(0, 0, (320 * 2), (320 * 2));
-    
-    UIGraphicsBeginImageContextWithOptions(scaledImgRect.size, NO, [UIScreen mainScreen].scale);
-    
-    [result drawInRect:scaledImgRect];
-    
-    UIImage *scaledNewImage = UIGraphicsGetImageFromCurrentImageContext();
-    
-    UIGraphicsEndImageContext();
-    
-    return scaledNewImage;
+//    CGRect scaledImgRect = CGRectMake(0, 0, (320 * 2), (320 * 2));
+//    
+//    UIGraphicsBeginImageContextWithOptions(scaledImgRect.size, NO, [UIScreen mainScreen].scale);
+//    
+//    [result drawInRect:scaledImgRect];
+//    
+//    UIImage *scaledNewImage = UIGraphicsGetImageFromCurrentImageContext();
+//    
+//    UIGraphicsEndImageContext();
+//    
+//    return scaledNewImage;
 
 }
 
